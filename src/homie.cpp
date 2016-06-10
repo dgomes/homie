@@ -66,6 +66,7 @@ bool Homie::connect() {
         subscribe_property(String(nodes[i]) + "/set"); 
     }
     nodes_str += String(this->nodes[i]);
+    subscribe_property(String(nodes[i]) + "/set"); 
     if(!publish_property(String("$nodes"), nodes_str)) {
         publish_property(String("$nodes"), "error: too many");
     }
