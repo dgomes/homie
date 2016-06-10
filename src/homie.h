@@ -1,5 +1,5 @@
 /*
- Homie.h - A simple client for MQTT.
+ Homie.h - A simple client for MQTT using Homie convention.
   Diogo Gomes
   http://diogogomes.com
 */
