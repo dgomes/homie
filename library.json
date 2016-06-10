@@ -1,0 +1,16 @@
+{
+    "name": "Homie",
+    "keywords": "mqtt, m2m, iot",
+    "description": "A lightweight MQTT convention for the IoT https://git.io/homieiot",
+    "repository": {
+        "type": "git",
+        "url": "https://github.com/dgomes/homie.git"
+    },
+    "version": "0.1",
+    "exclude": "tests",
+    "examples": "examples/*/*.ino",
+    "frameworks": "arduino",
+    "platforms": [
+        "atmelavr",
+    ]
+}
