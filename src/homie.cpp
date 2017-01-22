@@ -39,7 +39,7 @@ bool Homie::publish_property(String property, String value) {
 
 bool Homie::subscribe_property(String property) {
     String prop = String(MQTT_BASE_TOPIC) + deviceID + String("/") + property;
-    return this->_mqttClient->subscribe(prop.c_str()); 
+    return this->_mqttClient->subscribe(prop.c_str());
 }
 
 String Homie::base_topic() {
@@ -70,6 +70,7 @@ bool Homie::connect() {
     if(!publish_property(String("$nodes"), nodes_str)) {
         publish_property(String("$nodes"), "error: too many");
     }
+    publish_property(String("$debug"), String("#nodes subscribed: ")+String(i));
 
     return true;
 }
