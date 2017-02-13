@@ -38,6 +38,7 @@ class Homie {
         bool connect();
     public:
         void setup(byte *localip, MQTT_CALLBACK_SIGNATURE);
+        void setup(String localip, MQTT_CALLBACK_SIGNATURE);
         void setBrand(String name);
         void setFirmware(String name, String version);
 

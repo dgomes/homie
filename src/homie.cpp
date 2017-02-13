@@ -15,7 +15,11 @@ String IPaddress2String(byte *address) {
 }
 
 void Homie::setup(byte *localip, MQTT_CALLBACK_SIGNATURE) {
-    this->localip = IPaddress2String(localip); 
+	String localip_str = IPaddress2String(localip);
+	setup(localip_str, callback);
+}
+void Homie::setup(String localip, MQTT_CALLBACK_SIGNATURE) {
+    this->localip = localip; 
     this->callback = callback;
     this->_mqttClient->setCallback(callback);
 
@@ -60,18 +64,19 @@ bool Homie::connect() {
     publish_property(String("$fwversion"), this->firmaware_version);
 
     unsigned i = 0;
-    String nodes_str;
-    for (; i< this->nodes_size-1; i++) {
-        nodes_str += String(nodes[i])+ String(",");
-        subscribe_property(String(nodes[i]) + "/set"); 
-    }
-    nodes_str += String(this->nodes[i]);
-    subscribe_property(String(nodes[i]) + "/set"); 
-    if(!publish_property(String("$nodes"), nodes_str)) {
-        publish_property(String("$nodes"), "error: too many");
-    }
-    publish_property(String("$debug"), String("#nodes subscribed: ")+String(i));
-
+	if (this->nodes_size > 0) {
+	    String nodes_str;
+    	for (; i< this->nodes_size-1; i++) {
+        	nodes_str += String(nodes[i])+ String(",");
+	        subscribe_property(String(nodes[i]) + "/set"); 
+    	}
+	    nodes_str += String(this->nodes[i]);
+    	subscribe_property(String(nodes[i]) + "/set"); 
+	    if(!publish_property(String("$nodes"), nodes_str)) {
+    	    publish_property(String("$nodes"), "error: too many");
+	    }
+    	publish_property(String("$debug"), String("#nodes subscribed: ")+String(i+1));
+	}
     return true;
 }
 
