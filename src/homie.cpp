@@ -1,5 +1,12 @@
 #include "homie.h"
 
+Homie::Homie(PubSubClient &client, String deviceID) {
+    this->_mqttClient = &client;
+    this->deviceID = deviceID;
+    this->nodes = NULL; 
+    this->nodes_size = 0; 
+}
+
 Homie::Homie(PubSubClient &client, String deviceID, const char *nodes[], size_t nodes_size) {
     this->_mqttClient = &client;
     this->deviceID = deviceID;
@@ -37,12 +44,12 @@ void Homie::setFirmware(String name, String version) {
 }
 
 bool Homie::publish_property(String property, String value) {
-    String prop = String(MQTT_BASE_TOPIC) + deviceID + String("/") + property;
+    String prop = String(F(MQTT_BASE_TOPIC)) + deviceID + String("/") + property;
     return this->_mqttClient->publish(prop.c_str(), value.c_str(), true);
 }
 
 bool Homie::subscribe_property(String property) {
-    String prop = String(MQTT_BASE_TOPIC) + deviceID + String("/") + property;
+    String prop = String(F(MQTT_BASE_TOPIC)) + deviceID + String("/") + property;
     return this->_mqttClient->subscribe(prop.c_str());
 }
 
@@ -53,15 +60,15 @@ bool Homie::connect() {
     if(!this->_setupCalled)
         return false;
 
-    String online = String(MQTT_BASE_TOPIC) + deviceID + String("/$online");
+    String online = String(MQTT_BASE_TOPIC) + deviceID + String(F("/$online"));
     if(!this->_mqttClient->connect(this->deviceID.c_str(), NULL, NULL, online.c_str(), 0, true, "false"))
         return false;
 
-    publish_property(String("$online"), "true");
-    publish_property(String("$name"), this->brandname);
-    publish_property(String("$localip"), this->localip); 
-    publish_property(String("$fwname"), this->firmware_name); 
-    publish_property(String("$fwversion"), this->firmaware_version);
+    publish_property(String(F("$online")), "true");
+    publish_property(String(F("$name")), this->brandname);
+    publish_property(String(F("$localip")), this->localip); 
+    publish_property(String(F("$fwname")), this->firmware_name); 
+    publish_property(String(F("$fwversion")), this->firmaware_version);
 
     unsigned i = 0;
 	if (this->nodes_size > 0) {
@@ -73,9 +80,9 @@ bool Homie::connect() {
 	    nodes_str += String(this->nodes[i]);
     	subscribe_property(String(nodes[i]) + "/set"); 
 	    if(!publish_property(String("$nodes"), nodes_str)) {
-    	    publish_property(String("$nodes"), "error: too many");
+    	    publish_property(String("$nodes"), F("error: too many"));
 	    }
-    	publish_property(String("$debug"), String("#nodes subscribed: ")+String(i+1));
+    	publish_property(String("$debug"), String(F("#nodes subscribed: "))+String(i+1));
 	}
     return true;
 }

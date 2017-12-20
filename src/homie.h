@@ -48,6 +48,7 @@ class Homie {
         bool publish_property(String property, String value);
         bool subscribe_property(String property);
 
+        Homie(PubSubClient &client, String deviceID);
         Homie(PubSubClient &client, String deviceID, const char *nodes[], size_t nodes_size);
 };
 
