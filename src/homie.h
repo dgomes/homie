@@ -29,6 +29,7 @@ class Homie {
         String localip;
         String firmware_name = "0.0.0";
         String firmaware_version = "0.0.0";
+        unsigned long time; // var created to show uptime more close to zero milliseconds as possible
         const char **nodes;
         size_t nodes_size;
         unsigned long lastReconnectAttempt = 0;

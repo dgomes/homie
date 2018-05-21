@@ -101,7 +101,12 @@ bool Homie::loop() {
         }
 
     }
-    
+   
+	if ((millis()/10000) != time) {
+        time = millis()/10000;
+        publish_property(String(F("$uptime")), String(millis()/1000));
+    }
+ 
     this->_mqttClient->loop();
     return true;
 }
