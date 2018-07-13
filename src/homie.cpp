@@ -102,8 +102,8 @@ bool Homie::loop() {
 
     }
    
-	if ((millis()/10000) != time) {
-        time = millis()/10000;
+	if ((millis()/UPTIME_REPORT_PERIOD) != time) {
+        time = millis()/UPTIME_REPORT_PERIOD;
         publish_property(String(F("$uptime")), String(millis()/1000));
     }
  

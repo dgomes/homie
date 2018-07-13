@@ -19,6 +19,7 @@
 
 #define MQTT_BASE_TOPIC "devices/"
 #define RECONNECT_DELAY 5000
+#define UPTIME_REPORT_PERIOD 60000
 
 class Homie {
     private:
