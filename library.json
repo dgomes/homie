@@ -1,7 +1,7 @@
 {
     "name": "Homie",
     "keywords": "mqtt, m2m, iot",
-    "description": "A lightweight MQTT convention for the IoT https://git.io/homieiot",
+    "description": "A lightweight MQTT convention for the IoT https://github.com/homieiot/",
     "repository": {
         "type": "git",
         "url": "https://github.com/dgomes/homie.git"
