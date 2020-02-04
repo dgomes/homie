@@ -29,24 +29,25 @@ class Homie {
         String brandname = "Homie";
         String localip;
         String firmware_name = "0.0.0";
-        String firmaware_version = "0.0.0";
+        String firmware_version = "0.0.0";
         unsigned long time; // var created to show uptime more close to zero milliseconds as possible
-        const char **nodes;
-        size_t nodes_size;
         unsigned long lastReconnectAttempt = 0;
         MQTT_CALLBACK_SIGNATURE;
 
         String IPAddress2String(IPAddress addr);
+        String byteIP2String(byte *addr);
+
         bool connect();
+
     public:
-        void setup(byte *localip, MQTT_CALLBACK_SIGNATURE);
-        void setup(String localip, MQTT_CALLBACK_SIGNATURE);
+        bool setup(byte *localip, MQTT_CALLBACK_SIGNATURE);
+        bool setup(String localip, MQTT_CALLBACK_SIGNATURE);
+        bool setup(IPAddress localip, MQTT_CALLBACK_SIGNATURE);
         void setBrand(String name);
         void setFirmware(String name, String version);
 
         bool loop();
         
-        String base_topic();
         bool publish_property(String property, String value);
         bool subscribe_property(String property);
 

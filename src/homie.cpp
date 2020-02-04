@@ -1,37 +1,42 @@
 #include "homie.h"
 
+static char buf[128];
+
 Homie::Homie(PubSubClient &client, String deviceID) {
     this->_mqttClient = &client;
     this->deviceID = deviceID;
-    this->nodes = NULL; 
-    this->nodes_size = 0; 
 }
 
-Homie::Homie(PubSubClient &client, String deviceID, const char *nodes[], size_t nodes_size) {
-    this->_mqttClient = &client;
-    this->deviceID = deviceID;
-    this->nodes = nodes;
-    this->nodes_size = nodes_size;
-}
-
-String IPaddress2String(byte *address) {
+String IPaddress2String(IPAddress address) {
  return String(address[0]) + "." + 
         String(address[1]) + "." + 
         String(address[2]) + "." + 
         String(address[3]);
 }
 
-void Homie::setup(byte *localip, MQTT_CALLBACK_SIGNATURE) {
-	String localip_str = IPaddress2String(localip);
-	setup(localip_str, callback);
+String byteIP2String(byte *address) {
+ return String(address[0]) + "." + 
+        String(address[1]) + "." + 
+        String(address[2]) + "." + 
+        String(address[3]);
 }
-void Homie::setup(String localip, MQTT_CALLBACK_SIGNATURE) {
+
+bool Homie::setup(IPAddress localip, MQTT_CALLBACK_SIGNATURE) {
+	String localip_str = IPaddress2String(localip);
+	return setup(localip_str, callback);
+}
+
+bool Homie::setup(byte *localip, MQTT_CALLBACK_SIGNATURE) {
+	String localip_str = byteIP2String(localip);
+	return setup(localip_str, callback);
+}
+bool Homie::setup(String localip, MQTT_CALLBACK_SIGNATURE) {
     this->localip = localip; 
     this->callback = callback;
     this->_mqttClient->setCallback(callback);
 
     this->_setupCalled = true;
-    this->connect(); 
+    return this->connect(); 
 }
 
 void Homie::setBrand(String name) {
@@ -40,50 +45,35 @@ void Homie::setBrand(String name) {
 
 void Homie::setFirmware(String name, String version) {
     this->firmware_name = name;
-    this->firmaware_version = version;
+    this->firmware_version = version;
 }
 
 bool Homie::publish_property(String property, String value) {
-    String prop = String(F(MQTT_BASE_TOPIC)) + deviceID + String("/") + property;
-    return this->_mqttClient->publish(prop.c_str(), value.c_str(), true);
+    sprintf(buf, "%s%s/%s",MQTT_BASE_TOPIC, this->deviceID.c_str(), property.c_str());
+    return this->_mqttClient->publish(buf, value.c_str(), true);
 }
 
 bool Homie::subscribe_property(String property) {
-    String prop = String(F(MQTT_BASE_TOPIC)) + deviceID + String("/") + property;
-    return this->_mqttClient->subscribe(prop.c_str());
+    sprintf(buf, "%s%s/%s",MQTT_BASE_TOPIC, this->deviceID.c_str(), property.c_str());
+    return this->_mqttClient->subscribe(buf);
 }
 
-String Homie::base_topic() {
-    return String(MQTT_BASE_TOPIC) + deviceID + String("/"); 
-}
 bool Homie::connect() {
     if(!this->_setupCalled)
         return false;
 
-    String online = String(MQTT_BASE_TOPIC) + deviceID + String(F("/$online"));
-    if(!this->_mqttClient->connect(this->deviceID.c_str(), NULL, NULL, online.c_str(), 0, true, "false"))
+    sprintf(buf, "%s%s/%s",MQTT_BASE_TOPIC, this->deviceID.c_str(), "$online");
+    if(!this->_mqttClient->connect(this->deviceID.c_str(), buf, 1, true, "false")) {
+        DEBUG_PRINTLN(F("Failed to connect to MQTT"));
         return false;
+    }
 
-    publish_property(String(F("$online")), "true");
-    publish_property(String(F("$name")), this->brandname);
-    publish_property(String(F("$localip")), this->localip); 
-    publish_property(String(F("$fwname")), this->firmware_name); 
-    publish_property(String(F("$fwversion")), this->firmaware_version);
+    publish_property(F("$online"), "true");
+    publish_property(F("$name"), this->brandname);
+    publish_property(F("$localip"), this->localip); 
+    publish_property(F("$fwname"), this->firmware_name); 
+    publish_property(F("$fwversion"), this->firmware_version);
 
-    unsigned i = 0;
-	if (this->nodes_size > 0) {
-	    String nodes_str;
-    	for (; i< this->nodes_size-1; i++) {
-        	nodes_str += String(nodes[i])+ String(",");
-	        subscribe_property(String(nodes[i]) + "/set"); 
-    	}
-	    nodes_str += String(this->nodes[i]);
-    	subscribe_property(String(nodes[i]) + "/set"); 
-	    if(!publish_property(String("$nodes"), nodes_str)) {
-    	    publish_property(String("$nodes"), F("error: too many"));
-	    }
-    	publish_property(String("$debug"), String(F("#nodes subscribed: "))+String(i+1));
-	}
     return true;
 }
 
@@ -104,7 +94,7 @@ bool Homie::loop() {
    
 	if ((millis()/UPTIME_REPORT_PERIOD) != time) {
         time = millis()/UPTIME_REPORT_PERIOD;
-        publish_property(String(F("$uptime")), String(millis()/1000));
+        publish_property(F("$uptime"), String(millis()/1000));
     }
  
     this->_mqttClient->loop();
